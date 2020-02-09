@@ -508,6 +508,8 @@ void BiometricsFingerprint::IdleAsync() {
 #endif
 
     rc = mTrustlet.SetWorkMode(WorkMode::NavigationDetect);
+    // rc = mTrustlet.SetWorkMode(WorkMode::Detect);
+    rc |= mTrustlet.InitNavigation();
     LOG_ALWAYS_FATAL_IF(rc, "SetWorkMode(WorkMode::NavigationDetect) failed with rc=%d", rc);
 
     for (;;) {

@@ -58,7 +58,7 @@ EGISAPTrustlet::EGISAPTrustlet() : QSEETrustlet("egisap32", 0x2400) {
 
 int EGISAPTrustlet::SendCommand(EGISAPTrustlet::API &api) {
     // TODO: += !
-    api.GetRequest().process = 0xe0;
+    api.GetRequest().process += 0xe0;
     auto &base = api.PrepareBase(api.GetRequest().process);
 
     // Already covered by memset:
@@ -86,15 +86,20 @@ int EGISAPTrustlet::SendCommand(EGISAPTrustlet::API &api) {
     return rc;
 }
 
-int EGISAPTrustlet::SendCommand(EGISAPTrustlet::API &buffer, CommandId commandId, uint32_t gid) {
+int EGISAPTrustlet::SendCommand(EGISAPTrustlet::API &buffer, CommandId commandId, uint32_t gid, uint32_t process) {
+    buffer.GetRequest().process = process;
     buffer.GetRequest().command = commandId;
     buffer.GetRequest().gid = gid;
     return SendCommand(buffer);
 }
 
-int EGISAPTrustlet::SendCommand(CommandId commandId, uint32_t gid) {
+int EGISAPTrustlet::InitNavigation() {
+    return SendCommand((CommandId)2, 0, 4);
+}
+
+int EGISAPTrustlet::SendCommand(CommandId commandId, uint32_t gid, uint32_t process) {
     auto api = GetLockedAPI();
-    return SendCommand(api, commandId, gid);
+    return SendCommand(api, commandId, gid, process);
 }
 
 int EGISAPTrustlet::SendModifiedCommand(EGISAPTrustlet::API &api, IonBuffer &ionBuffer) {

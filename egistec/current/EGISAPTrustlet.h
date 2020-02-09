@@ -52,6 +52,8 @@ enum class CommandId : uint32_t {
     OpenSpi = 0x29,
     CloseSpi = 0x2a,
 
+    NaviControl = 0x28,
+
     GetHwId = 0x64,
 };
 
@@ -190,14 +192,16 @@ class EGISAPTrustlet : public QSEETrustlet {
     EGISAPTrustlet();
 
     int SendCommand(API &);
-    int SendCommand(API &, CommandId, uint32_t gid = 0);
-    int SendCommand(CommandId, uint32_t gid = 0);
+    int SendCommand(API &, CommandId, uint32_t gid = 0, uint32_t process = 0);
+    int SendCommand(CommandId, uint32_t gid = 0, uint32_t process = 0);
     int SendModifiedCommand(API &, IonBuffer &);
     int SendModifiedCommand(API &, IonBuffer &, CommandId, uint32_t gid = 0);
     int SendModifiedCommand(IonBuffer &, CommandId, uint32_t gid = 0);
     int SendDataCommand(API &, CommandId, const void *data, size_t length, uint32_t gid = 0);
     int SendDataCommand(CommandId, const void *data, size_t length, uint32_t gid = 0);
     API GetLockedAPI();
+
+    int InitNavigation();
 
     int Calibrate();
     int GetNavEvent(int &which);
