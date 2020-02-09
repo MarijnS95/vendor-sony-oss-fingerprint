@@ -525,10 +525,12 @@ void BiometricsFingerprint::IdleAsync() {
 
     rc = mTrustlet.SetWorkMode(WorkMode::NavigationDetect);
     // rc = mTrustlet.SetWorkMode(WorkMode::Detect);
-    rc |= mTrustlet.InitNavigation();
     LOG_ALWAYS_FATAL_IF(rc, "SetWorkMode(WorkMode::NavigationDetect) failed with rc=%d", rc);
 
     for (;;) {
+        rc = mTrustlet.NaviControl(NaviControlState::Start);
+        LOG_ALWAYS_FATAL_IF(rc, "NaviControl(NaviControlState::Start) failed with rc=%d", rc);
+
         rc = mTrustlet.GetNavEvent(which);
         LOG_ALWAYS_FATAL_IF(rc, "GetNavEvent failed!");
 
@@ -571,6 +573,9 @@ void BiometricsFingerprint::IdleAsync() {
             break;
         }
     }
+
+    rc = mTrustlet.NaviControl(NaviControlState::Stop);
+    LOG_ALWAYS_FATAL_IF(rc, "NaviControl(NaviControlState::Stop) failed with rc=%d", rc);
 
     rc = mTrustlet.SetWorkMode(WorkMode::Sleep);
     LOG_ALWAYS_FATAL_IF(rc, "SetWorkMode(WorkMode::Sleep) failed with rc=%d", rc);

@@ -210,6 +210,18 @@ int EGISAPTrustlet::InitializeSensor() {
     return SendCommand(CommandId::InitializeSensor);
 }
 
+int EGISAPTrustlet::NaviControl(NaviControlState state) {
+    auto api = GetLockedAPI();
+    auto &req = api.GetRequest();
+
+    req.buffer_size = sizeof(state);
+    *reinterpret_cast<NaviControlState *>(req.data) = state;
+
+    ALOGI("Setting navi control %d", state);
+
+    return SendCommand(api, CommandId::NaviControl);
+}
+
 int EGISAPTrustlet::SetDataPath(const char *data_path) {
     return SendDataCommand(CommandId::SetDataPath, data_path, strlen(data_path), 1);
 }

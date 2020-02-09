@@ -86,6 +86,11 @@ enum class WorkMode : uint32_t {
     NavigationDetect = 3,
 };
 
+enum class NaviControlState : uint32_t {
+    Start = 0,
+    Stop = 1,
+};
+
 /**
  * The datastructure through which this userspace HAL communicates with the TZ app.
  */
@@ -229,6 +234,7 @@ class EGISAPTrustlet : public QSEETrustlet {
     int GetNavEvent(int &which);
     int InitializeAlgo();
     int InitializeSensor();
+    int NaviControl(NaviControlState);
     int SetDataPath(const char *);
     int SetMasterKey(const MasterKey &);
     int SetUserDataPath(uint32_t gid, const char *);
