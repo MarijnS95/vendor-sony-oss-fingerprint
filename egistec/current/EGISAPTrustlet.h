@@ -46,7 +46,10 @@ enum class CommandId : uint32_t {
     CheckSecureId = 0x1e,
     CheckAuthToken = 0x1f,
     GetAuthenticatorId = 0x20,
+    // SetData = 0x21,
+    // GetData = 0x22,
 
+    // ExtraCommand = 0x24,
     IsFingerLost = 0x25,
 
     OpenSpi = 0x29,
@@ -55,6 +58,12 @@ enum class CommandId : uint32_t {
     NaviControl = 0x28,
 
     GetHwId = 0x64,
+
+    // 0x600+
+    GetIdentifyStats = 0x65,
+    GetImageStats = 0x66,
+    GetTemplateQualityStats = 0x67,
+    GetEnrolledTemplateSize = 0x68,
 };
 
 enum class ImageResult : uint32_t {
@@ -143,6 +152,19 @@ typedef struct {
     uint32_t sensor_hwid;
     hw_auth_token_t hat;
 } identify_result_t;
+
+typedef struct {
+    uint32_t is_valid;
+    uint32_t cov;
+    uint32_t quality;
+    ImageResult reject_reason;
+} image_stats_t;
+
+typedef struct {
+    uint32_t status;
+    uint32_t conf;         // Confidence?
+    uint32_t print_index;  // n'th registered print
+} identify_stats_t;
 
 class EGISAPTrustlet : public QSEETrustlet {
    protected:
@@ -242,6 +264,12 @@ class EGISAPTrustlet : public QSEETrustlet {
     int InitializeIdentify();
     int SaveTemplate();
     int UpdateTemplate(bool &updated);
+
+    // Stats
+    int GetIdentifyStats(identify_stats_t &);
+    int GetImageStats(image_stats_t &);
+    int GetTemplateQualityStats();
+    int GetEnrolledTemplateSize(uint32_t &);
 };
 
 }  // namespace egistec::current

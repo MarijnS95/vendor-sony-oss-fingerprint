@@ -455,4 +455,70 @@ int EGISAPTrustlet::UpdateTemplate(bool &updated) {
     return 0;
 }
 
+int EGISAPTrustlet::GetIdentifyStats(identify_stats_t &stats) {
+    TypedIonBuffer<identify_stats_t> result;
+
+    int rc = SendModifiedCommand(result, CommandId::GetIdentifyStats);
+    if (rc)
+        return rc;
+
+    stats = *result;
+
+    ALOGD("Identify stats: status = %d, confidence = %d, idx = %d",
+          result->status,
+          result->conf,
+          result->print_index);
+
+    return 0;
+}
+
+int EGISAPTrustlet::GetImageStats(image_stats_t &stats) {
+    TypedIonBuffer<image_stats_t> result;
+
+    int rc = SendModifiedCommand(result, CommandId::GetImageStats);
+    if (rc)
+        return rc;
+
+    stats = *result;
+
+    return 0;
+}
+
+int EGISAPTrustlet::GetTemplateQualityStats() {
+    typedef struct {
+        uint32_t num1;
+        uint32_t num2;
+        uint32_t num3;
+        uint32_t num4;
+        uint32_t template_size;
+    } template_quality_stats_t;
+    TypedIonBuffer<template_quality_stats_t> result;
+
+    int rc = SendModifiedCommand(result, CommandId::GetTemplateQualityStats);
+    if (rc)
+        return rc;
+
+    ALOGD("Quality stats: %d %d %d %d template_size=%d",
+          result->num1,
+          result->num2,
+          result->num3,
+          result->num4,
+          result->template_size);
+
+    return 0;
+}
+
+int EGISAPTrustlet::GetEnrolledTemplateSize(uint32_t &size) {
+    TypedIonBuffer<uint32_t> result;
+
+    int rc = SendModifiedCommand(result, CommandId::GetEnrolledTemplateSize);
+    if (rc)
+        return rc;
+
+    size = *result;
+    ALOGD("Enrolled template size: %d", size);
+
+    return 0;
+}
+
 }  // namespace egistec::current

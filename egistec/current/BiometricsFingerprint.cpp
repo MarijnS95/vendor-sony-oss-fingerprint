@@ -313,6 +313,18 @@ void BiometricsFingerprint::AuthenticateAsync() {
                 if (rc)
                     break;
 
+                if (mHwId >= 0x600) {
+                    image_stats_t stats;
+                    rc = mTrustlet.GetImageStats(stats);
+                    ALOGE_IF(rc, "%s: Failed to get image stats, rc = %d", __func__, rc);
+                    if (!rc)
+                        ALOGI("valid = %d, cov = %d, quality = %d, reject_reason = %d",
+                              stats.is_valid,
+                              stats.cov,
+                              stats.quality,
+                              stats.reject_reason);
+                }
+
                 state = WaitFingerLost;
                 force_retry = false;
 
@@ -390,6 +402,10 @@ void BiometricsFingerprint::AuthenticateAsync() {
                 ALOGI("Identify status = %d, match_id = %d",
                       identify_result.status,
                       identify_result.match_id);
+
+                identify_stats_t stats;
+                rc = mTrustlet.GetIdentifyStats(stats);
+                ALOGE_IF(rc, "%s: Failed to retrieve identify stats, rc = %d", __func__, rc);
 
                 if (identify_result.status == 0) {
                     if (image_result == ImageResult::ImagerDirty) {
@@ -626,6 +642,18 @@ void BiometricsFingerprint::EnrollAsync() {
                 if (rc)
                     break;
 
+                if (mHwId >= 0x600) {
+                    image_stats_t stats;
+                    rc = mTrustlet.GetImageStats(stats);
+                    ALOGE_IF(rc, "%s: Failed to get image stats, rc = %d", __func__, rc);
+                    if (!rc)
+                        ALOGI("valid = %d, cov = %d, quality = %d, reject_reason = %d",
+                              stats.is_valid,
+                              stats.cov,
+                              stats.quality,
+                              stats.reject_reason);
+                }
+
                 state = WaitFingerLost;
 
                 switch (image_result) {
@@ -796,6 +824,12 @@ void BiometricsFingerprint::EnrollAsync() {
     rc = mTrustlet.FinalizeEnroll();
     ALOGE_IF(rc, "%s: Failed to uninitialize enroll, rc = %d", __func__, rc);
 
+    // TODO FIX:
+    // 02-05 15:39:11.260  6745  6746 I FPC ET  : EnrollAsync: Finalizing, Percentage = 8%
+    // 02-05 15:39:11.261  6745  6746 E FPC ET  : SendCommand ret_val = 0xffff6007
+    // 02-05 15:39:11.261  6745  6746 E FPC ET  : EnrollAsync: Failed to uninitialize enroll, rc = -40953
+    // 02-05 15:39:11.262  6745  6746 I FPC ET  : EnrollAsync: Canceled
+
     if (canceled) {
         ALOGI("%s: Canceled", __func__);
         NotifyError(FingerprintError::ERROR_CANCELED);
@@ -806,7 +840,16 @@ void BiometricsFingerprint::EnrollAsync() {
         ALOGI("%s: Finalizing with error %d", __func__, rc);
         NotifyError(FingerprintError::ERROR_UNABLE_TO_PROCESS);
     } else if (percentage_done >= 100) {
+        rc = mTrustlet.GetTemplateQualityStats();
+
+        // 02-08 07:36:06.132   949  1133 D FPC ET  : Quality stats: 1 13 57 6079 97804
+        // 02-08 07:36:06.133   949  1133 D FPC ET  : Extra buffer return size: 4
+        // 02-08 07:36:06.133   949  1133 D FPC ET  : Enrolled template size: 97804
+
+        uint32_t sz;
+        mTrustlet.GetEnrolledTemplateSize(sz);
         rc = mTrustlet.SaveEnrolledPrint(mGid, mNewPrintId);
+
         NotifyEnrollResult(mNewPrintId, 0);
         ALOGE_IF(rc, "%s: Failed to save print, rc = %d", __func__, rc);
     }

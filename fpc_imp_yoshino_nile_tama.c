@@ -453,6 +453,7 @@ err_t fpc_capture_image(fpc_imp_data_t *data)
 
                 // Stock raises INSUFFICIENT:
                 ret = FINGERPRINT_ACQUIRED_INSUFFICIENT;
+                // Yoshino sets FINGERPRINT_ACQUIRED_TOO_SLOW
                 break;
             }
         };
