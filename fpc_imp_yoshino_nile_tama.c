@@ -477,7 +477,7 @@ err_t fpc_capture_image(fpc_imp_data_t *data)
 
 bool fpc_navi_supported(fpc_imp_data_t __unused *data)
 {
-#if defined(USE_FPC_YOSHINO) || defined(USE_FPC_NILE)
+#if defined(USE_FPC_NILE)
     // On yoshino TZ-app crashes the entire phone with this feature.
     // On nile this seems to be unsupported and results in FPC_ERROR_CONFIG
     return false;
