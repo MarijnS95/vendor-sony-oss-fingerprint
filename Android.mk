@@ -89,5 +89,62 @@ LOCAL_CFLAGS += \
     -fexceptions
 
 include $(BUILD_EXECUTABLE)
+
+include $(CLEAR_VARS)
+
+LOCAL_MODULE := fingerprint.$(TARGET_DEVICE)
+LOCAL_MODULE_RELATIVE_PATH := hw
+LOCAL_PROPRIETARY_MODULE := true
+LOCAL_MODULE_RELATIVE_PATH := hw
+LOCAL_SRC_FILES := \
+    fingerprint.cpp \
+    QSEEComFunc.c \
+    ion_buffer.c \
+    common.c \
+    UInput.cpp \
+    SynchronizedWorkerThread.cpp \
+    QSEETrustlet.cpp \
+    QSEEKeymasterTrustlet.cpp \
+    IonBuffer.cpp \
+    EventMultiplexer.cpp
+
+# ---------------- FPC ----------------
+ifeq ($(filter-out loire tone,$(SOMC_PLATFORM)),)
+LOCAL_SRC_FILES += fpc_imp_loire_tone.c
+endif
+
+ifeq ($(filter-out yoshino,$(SOMC_PLATFORM)),)
+LOCAL_SRC_FILES += fpc_imp_yoshino_nile_tama.c
+LOCAL_CFLAGS += \
+    -DUSE_FPC_YOSHINO
+endif
+
+ifeq ($(filter-out nile,$(SOMC_PLATFORM)),)
+# NOTE: Nile can have either FPC or Egistec
+LOCAL_SRC_FILES += fpc_imp_yoshino_nile_tama.c
+LOCAL_CFLAGS += \
+    -DUSE_FPC_NILE \
+    -DHAS_LEGACY_EGISTEC
+endif
+
+ifeq ($(filter-out tama,$(SOMC_PLATFORM)),)
+LOCAL_SRC_FILES += fpc_imp_yoshino_nile_tama.c
+LOCAL_CFLAGS += \
+    -DUSE_FPC_TAMA
+endif
+
+LOCAL_SHARED_LIBRARIES := \
+    libdl \
+    libion \
+    libhardware \
+    liblog \
+    libutils
+
+LOCAL_CFLAGS += \
+    -DPLATFORM_SDK_VERSION=$(PLATFORM_SDK_VERSION) \
+    -fexceptions
+
+include $(BUILD_SHARED_LIBRARY)
+
 endif
 endif # PRODUCT_PLATFORM_SOD
